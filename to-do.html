@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Garamond&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #fff6eb;
+      --text-color: #333;
+      --accent-color: #f78fb3;
+      --card-bg: #fff;
+      --input-bg: #fff;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1e1e2f;
+      --text-color: #f5f5f5;
+      --accent-color: #d16ba5;
+      --card-bg: #2e2e4d;
+      --input-bg: #3b3b5c;
+      --shadow: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body {
+      font-family: 'Garamond', serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: var(--accent-color);
+      color: white;
+      padding: 1rem;
+      font-family: 'Allura', cursive;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+
+    #todo-container {
+      max-width: 600px;
+      background-color: var(--card-bg);
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+    }
+
+    input, select {
+      display: block;
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+    }
+
+    button {
+      padding: 0.7rem 1.2rem;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin: 1rem 0 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background-color: var(--input-bg);
+      margin: 0.6rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .task-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .controls {
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  My Planner
+</header>
+
+<div id="todo-container">
+  <h2>Add New Task</h2>
+  <label for="taskInput">Task Description</label>
+  <input type="text" id="taskInput" placeholder="Task description...">
+
+  <label for="priorityInput">Priority</label>
+  <select id="priorityInput">
+    <option value="Low">Low Priority</option>
+    <option value="Medium">Medium Priority</option>
+    <option value="High">High Priority</option>
+  </select>
+
+  <label for="dateInput">Due Date</label>
+  <input type="date" id="dateInput" placeholder="dd-mm-yyyy" title="Select due date in dd-mm-yyyy format">
+
+  <label for="urgencyInput">Urgency</label>
+  <select id="urgencyInput">
+    <option value="Normal">Normal</option>
+    <option value="Important">Important</option>
+  </select>
+
+  <button onclick="addTask()">Add Task</button>
+  <ul id="taskList"></ul>
+</div>
+
+<script>
+const taskInput = document.getElementById("taskInput");
+const priorityInput = document.getElementById("priorityInput");
+const dateInput = document.getElementById("dateInput");
+const urgencyInput = document.getElementById("urgencyInput");
+const taskList = document.getElementById("taskList");
+
+function addTask() {
+  const taskText = taskInput.value.trim();
+  const priority = priorityInput.value;
+  const dueDate = dateInput.value;
+  const urgency = urgencyInput.value;
+  if (taskText === "") return;
+  const li = document.createElement("li");
+  const taskInfo = document.createElement("div");
+  taskInfo.className = "task-info";
+  const taskDetails = document.createElement("div");
+  taskDetails.innerHTML = `<strong>${taskText}</strong><br>
+    Priority: ${priority} | Due: ${dueDate || 'None'} | ${urgency}`;
+  const completeBtn = document.createElement("input");
+  completeBtn.type = "checkbox";
+  completeBtn.onclick = () => {
+    taskDetails.classList.toggle("completed");
+  };
+  taskInfo.appendChild(taskDetails);
+  taskInfo.appendChild(completeBtn);
+  li.appendChild(taskInfo);
+  const controls = document.createElement("div");
+  controls.className = "controls";
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Edit";
+  editBtn.onclick = () => editTask(li, taskDetails, completeBtn);
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.onclick = () => li.remove();
+  controls.appendChild(editBtn);
+  controls.appendChild(deleteBtn);
+  li.appendChild(controls);
+  taskList.appendChild(li);
+  taskInput.value = "";
+  dateInput.value = "";
+  priorityInput.value = "Low";
+  urgencyInput.value = "Normal";
+}
+
+function editTask(li, taskDetails, completeBtn) {
+  const currentText = taskDetails.innerText.split("\n")[0];
+  const editInput = document.createElement("input");
+  editInput.type = "text";
+  editInput.className = "edit-input";
+  editInput.value = currentText;
+  const saveBtn = document.createElement("button");
+  saveBtn.textContent = "Save";
+  saveBtn.onclick = () => {
+    const newTask = editInput.value.trim();
+    if (newTask !== "") {
+      taskDetails.innerHTML = `<strong>${newTask}</strong><br>${taskDetails.innerHTML.split("<br>")[1]}`;
+      li.replaceChild(taskDetails, editInput);
+      li.removeChild(saveBtn);
+    }
+  };
+  li.insertBefore(editInput, taskDetails);
+  li.insertBefore(saveBtn, taskDetails);
+  li.removeChild(taskDetails);
+}
+</script>
+
+</body>
+</html>
